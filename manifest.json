@@ -1,0 +1,9 @@
+{
+  "name": "宅建 学習ナビ",
+  "short_name": "宅建ナビ",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f7fa",
+  "theme_color": "#17324d",
+  "lang": "ja"
+}
