@@ -1,673 +1,200 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#17324d" />
-  <title>宅建 学習ナビ</title>
-  <link rel="manifest" href="manifest.json" />
-  <style>
-    :root {
-      --navy:#17324d;
-      --navy2:#234d70;
-      --bg:#f4f7fa;
-      --card:#ffffff;
-      --text:#1c2733;
-      --muted:#6b7785;
-      --line:#dbe3ea;
-      --ok:#2d8a58;
-      --warn:#d88a17;
-      --bad:#c84646;
-      --accent:#356f9d;
-      --shadow:0 7px 24px rgba(23,50,77,.09);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
-      color:var(--text);
-      background:var(--bg);
-      padding-bottom:92px;
-    }
-    header{
-      position:sticky;top:0;z-index:10;
-      background:linear-gradient(135deg,var(--navy),var(--navy2));
-      color:#fff;
-      padding:calc(14px + env(safe-area-inset-top)) 18px 14px;
-      box-shadow:0 3px 16px rgba(0,0,0,.16);
-    }
-    .headrow{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
-    h1{font-size:21px;margin:0;letter-spacing:.02em}
-    .version{font-size:11px;opacity:.78;white-space:nowrap}
-    main{max-width:760px;margin:0 auto;padding:16px}
-    .card{
-      background:var(--card);border:1px solid var(--line);border-radius:18px;
-      padding:16px;margin-bottom:14px;box-shadow:var(--shadow);
-    }
-    .hero{background:linear-gradient(145deg,#fff,#edf5fb)}
-    .eyebrow{font-size:12px;color:var(--muted);font-weight:700}
-    .countdown{font-size:28px;font-weight:800;margin:4px 0}
-    .sub{font-size:13px;color:var(--muted);line-height:1.55}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-    .stat{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
-    .stat strong{display:block;font-size:23px;margin-top:2px}
-    .progress{height:10px;background:#e6edf3;border-radius:999px;overflow:hidden;margin:12px 0 6px}
-    .progress > div{height:100%;background:linear-gradient(90deg,var(--accent),#65a7d1);border-radius:999px}
-    h2{font-size:17px;margin:0 0 12px}
-    h3{font-size:15px;margin:0 0 8px}
-    button,select,input{
-      font:inherit;
-    }
-    button{
-      border:0;border-radius:13px;padding:12px 14px;font-weight:750;cursor:pointer;
-      background:var(--navy);color:#fff;
-    }
-    button.secondary{background:#eaf1f6;color:var(--navy);border:1px solid #cbdbe7}
-    button.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
-    button.danger{background:#fff0f0;color:var(--bad);border:1px solid #efc6c6}
-    button:disabled{opacity:.45;cursor:not-allowed}
-    .buttonrow{display:flex;gap:9px;flex-wrap:wrap}
-    .buttonrow > *{flex:1;min-width:120px}
-    .today-list{display:flex;flex-wrap:wrap;gap:8px}
-    .chip{
-      display:inline-flex;align-items:center;gap:6px;
-      padding:9px 11px;border-radius:999px;background:#eef4f8;border:1px solid #d5e1ea;
-      font-weight:750;font-size:13px;
-    }
-    .chip.review{background:#fff4e4;border-color:#f1d09c}
-    .chip.overdue{background:#fff0f0;border-color:#edc0c0}
-    .section{display:none}
-    .section.active{display:block}
-    .tabs{
-      position:fixed;left:0;right:0;bottom:0;z-index:20;
-      display:grid;grid-template-columns:repeat(4,1fr);
-      background:rgba(255,255,255,.96);backdrop-filter:blur(10px);
-      border-top:1px solid var(--line);padding:7px 8px calc(7px + env(safe-area-inset-bottom));
-    }
-    .tab{
-      background:transparent;color:var(--muted);padding:8px 3px;border-radius:11px;
-      font-size:11px;font-weight:700;
-    }
-    .tab.active{background:#eaf1f6;color:var(--navy)}
-    .tab span{display:block;font-size:20px;line-height:1.1;margin-bottom:2px}
-    label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:11px 0 5px}
-    input,select{
-      width:100%;padding:12px;border:1px solid #cfd9e2;border-radius:12px;background:#fff;color:var(--text);
-    }
-    .book{
-      border:1px solid var(--line);border-radius:15px;padding:13px;margin:10px 0;background:#fff;
-    }
-    .bookhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
-    .badge{font-size:11px;border-radius:999px;padding:5px 8px;background:#eaf1f6;color:var(--navy);font-weight:700}
-    .question-box{text-align:center}
-    .qno{font-size:44px;font-weight:850;line-height:1.1;margin:14px 0 4px}
-    .rating-row{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px}
-    .rate{font-size:24px;padding:16px 4px}
-    .rate.ok{background:var(--ok)}
-    .rate.mid{background:var(--warn)}
-    .rate.bad{background:var(--bad)}
-    .history{font-size:13px;color:var(--muted);margin-top:10px;min-height:20px}
-    .listrow{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding:11px 0;border-bottom:1px solid #edf1f4;
-    }
-    .listrow:last-child{border-bottom:0}
-    .tiny{font-size:12px;color:var(--muted)}
-    .status{font-size:20px;font-weight:800}
-    .oktxt{color:var(--ok)} .midtxt{color:var(--warn)} .badtxt{color:var(--bad)}
-    .notice{
-      border-left:4px solid var(--accent);padding:10px 12px;background:#edf5fb;border-radius:8px;
-      font-size:13px;line-height:1.55;margin-top:10px;
-    }
-    .warnbox{border-left-color:var(--warn);background:#fff7e9}
-    .modal{
-      position:fixed;inset:0;z-index:40;background:rgba(10,20,30,.5);
-      display:none;align-items:flex-end;justify-content:center;
-    }
-    .modal.open{display:flex}
-    .sheet{
-      width:min(760px,100%);max-height:90vh;overflow:auto;background:#fff;
-      border-radius:22px 22px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));
-    }
-    .sheethead{display:flex;align-items:center;justify-content:space-between}
-    .close{background:#eef3f6;color:var(--navy);padding:8px 11px}
-    .empty{text-align:center;color:var(--muted);padding:24px 5px}
-    @media(min-width:700px){
-      .tabs{left:50%;transform:translateX(-50%);max-width:760px;border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0}
-      .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17324d">
+<title>宅建 学習ナビ</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{--navy:#17324d;--navy2:#265678;--bg:#f4f7fa;--card:#fff;--text:#1c2733;--muted:#6b7785;--line:#dbe3ea;--ok:#2d8a58;--mid:#d88a17;--bad:#c84646;--accent:#356f9d;--shadow:0 7px 24px rgba(23,50,77,.09)}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;background:var(--bg);color:var(--text);padding-bottom:92px}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 14px;box-shadow:0 3px 16px rgba(0,0,0,.16)}
+.head{display:flex;align-items:flex-end;justify-content:space-between}.head h1{font-size:21px;margin:0}.version{font-size:11px;opacity:.8}
+main{max-width:760px;margin:auto;padding:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.hero{background:linear-gradient(145deg,#fff,#edf5fb)}h2{font-size:17px;margin:0 0 12px}.eyebrow,.tiny{font-size:12px;color:var(--muted)}.sub{font-size:13px;color:var(--muted);line-height:1.55}
+.countdown{font-size:28px;font-weight:850;margin:4px 0}.progress{height:10px;background:#e6edf3;border-radius:999px;overflow:hidden;margin:12px 0 6px}.progress div{height:100%;background:linear-gradient(90deg,var(--accent),#65a7d1);border-radius:999px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{border:1px solid var(--line);border-radius:14px;padding:12px}.stat strong{display:block;font-size:23px}
+button,input,select{font:inherit}button{border:0;border-radius:13px;padding:12px 14px;font-weight:750;background:var(--navy);color:#fff;cursor:pointer}button.secondary{background:#eaf1f6;color:var(--navy);border:1px solid #cbdbe7}button.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}button.danger{background:#fff0f0;color:var(--bad);border:1px solid #efc6c6}button:disabled{opacity:.45}
+.buttonrow{display:flex;gap:9px;flex-wrap:wrap}.buttonrow>*{flex:1;min-width:130px}
+.today-list{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:9px 11px;border-radius:999px;background:#eef4f8;border:1px solid #d5e1ea;font-weight:750;font-size:13px}.chip.review{background:#fff4e4;border-color:#f1d09c}
+.notice{border-left:4px solid var(--accent);padding:10px 12px;background:#edf5fb;border-radius:8px;font-size:13px;line-height:1.55;margin-top:10px}.warn{border-left-color:var(--mid);background:#fff7e9}
+.section{display:none}.section.active{display:block}.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(4,1fr);background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:7px 8px calc(7px + env(safe-area-inset-bottom))}
+.tab{background:transparent;color:var(--muted);padding:8px 3px;border-radius:11px;font-size:11px}.tab.active{background:#eaf1f6;color:var(--navy)}.tab span{display:block;font-size:20px}
+label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:11px 0 5px}input,select{width:100%;padding:12px;border:1px solid #cfd9e2;border-radius:12px;background:#fff}
+.question{text-align:center}.qno{font-size:44px;font-weight:850;margin:12px 0 4px}.category{font-size:15px;font-weight:750;color:var(--navy);margin:4px 0}.rating{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px}.rate{font-size:24px;padding:16px 4px}.rate.o{background:var(--ok)}.rate.t{background:var(--mid)}.rate.x{background:var(--bad)}
+.history{font-size:13px;color:var(--muted);margin-top:10px;min-height:20px}.listrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #edf1f4}.status{font-size:20px;font-weight:850}.ok{color:var(--ok)}.mid{color:var(--mid)}.bad{color:var(--bad)}
+.book{border:1px solid var(--line);border-radius:15px;padding:13px;margin:10px 0}.bookhead{display:flex;justify-content:space-between;gap:8px}.badge{font-size:11px;border-radius:999px;padding:5px 8px;background:#eaf1f6;color:var(--navy);font-weight:700;height:max-content}
+.reportbox{white-space:pre-wrap;background:#f7f9fb;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12px;line-height:1.55;max-height:300px;overflow:auto;margin-top:10px}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}.tabs{left:50%;transform:translateX(-50%);max-width:760px;border-radius:18px 18px 0 0}}
+</style>
 </head>
 <body>
-<header>
-  <div class="headrow">
-    <h1>宅建 学習ナビ</h1>
-    <div class="version">ver. 0.1.0</div>
-  </div>
-</header>
-
+<header><div class="head"><h1>宅建 学習ナビ</h1><div class="version">ver. 0.2.0</div></div></header>
 <main>
-  <section id="home" class="section active">
-    <div class="card hero">
-      <div class="eyebrow">2026年10月18日まで</div>
-      <div class="countdown" id="countdown">あと--日</div>
-      <div class="sub" id="paceText"></div>
-      <div class="progress"><div id="overallProgress" style="width:0%"></div></div>
-      <div class="tiny" id="overallText"></div>
-    </div>
+<section id="home" class="section active">
+ <div class="card hero"><div class="eyebrow" id="examLabel"></div><div class="countdown" id="countdown"></div><div class="sub" id="paceText"></div><div class="progress"><div id="overallProgress"></div></div><div class="tiny" id="overallText"></div></div>
+ <div class="card"><h2>今日のメニュー</h2><div class="sub" id="todaySummary"></div><div class="today-list" id="todayList" style="margin:12px 0"></div><div class="buttonrow"><button id="startBtn">今日の問題を始める</button><button class="secondary" id="rebuildBtn">組み直す</button></div><div class="notice warn" id="carryNotice"></div></div>
+ <div class="card"><h2>現在の状況</h2><div class="grid"><div class="stat"><span class="tiny">○</span><strong class="ok" id="statO">0</strong></div><div class="stat"><span class="tiny">△</span><strong class="mid" id="statT">0</strong></div><div class="stat"><span class="tiny">×</span><strong class="bad" id="statX">0</strong></div><div class="stat"><span class="tiny">未回答</span><strong id="statU">0</strong></div></div></div>
+ <div class="card"><h2>問題集別の進捗</h2><div id="bookProgress"></div></div>
+</section>
 
-    <div class="card">
-      <h2>今日のメニュー</h2>
-      <div id="todaySummary" class="sub"></div>
-      <div id="todayList" class="today-list" style="margin:12px 0"></div>
-      <div class="buttonrow">
-        <button id="startTodayBtn">今日の問題を始める</button>
-        <button class="secondary" id="rebuildTodayBtn">今日のメニューを組み直す</button>
-      </div>
-      <div class="notice warnbox" id="carryNotice"></div>
-    </div>
+<section id="study" class="section">
+ <div class="card question"><div class="eyebrow" id="studyBook"></div><div class="qno" id="studyNo">—</div><div class="category" id="studyCategory"></div><div class="sub" id="studyReason"></div><div class="rating"><button class="rate o" data-rate="O">○</button><button class="rate t" data-rate="T">△</button><button class="rate x" data-rate="X">×</button></div><div class="history" id="studyHistory"></div><div class="buttonrow" style="margin-top:16px"><button class="ghost" id="prevBtn">前へ</button><button class="ghost" id="nextBtn">次へ</button></div></div>
+ <div class="card"><h2>今日の進捗</h2><div class="sub" id="sessionText"></div><div class="progress"><div id="sessionBar"></div></div></div>
+</section>
 
-    <div class="card">
-      <h2>現在の状況</h2>
-      <div class="grid">
-        <div class="stat"><span class="tiny">○ 解けた</span><strong class="oktxt" id="statO">0</strong></div>
-        <div class="stat"><span class="tiny">△ 微妙</span><strong class="midtxt" id="statT">0</strong></div>
-        <div class="stat"><span class="tiny">× 解けない</span><strong class="badtxt" id="statX">0</strong></div>
-        <div class="stat"><span class="tiny">未回答</span><strong id="statU">0</strong></div>
-      </div>
-    </div>
+<section id="records" class="section">
+ <div class="card"><h2>問題一覧</h2><label>問題集</label><select id="recordBook"></select><label>表示</label><select id="recordFilter"><option value="all">すべて</option><option value="X">×だけ</option><option value="T">△だけ</option><option value="O">○だけ</option><option value="U">未回答だけ</option><option value="due">復習期限が来ている問題</option></select><div id="recordList" style="margin-top:12px"></div></div>
+</section>
 
-    <div class="card">
-      <h2>復習ルール</h2>
-      <div class="sub">
-        ×は翌日、△は3日後、○は7日後に再確認します。再び正解できた問題は、次回を14日後→30日後へ延ばします。
-        締切前14日間は、過去に×や△が付いた問題を優先して総復習します。
-      </div>
-    </div>
-  </section>
-
-  <section id="study" class="section">
-    <div class="card question-box">
-      <div class="eyebrow" id="studyBook">問題集</div>
-      <div class="qno" id="studyNo">—</div>
-      <div class="sub" id="studyReason">今日の問題</div>
-      <div class="rating-row">
-        <button class="rate ok" data-rating="O">○</button>
-        <button class="rate mid" data-rating="T">△</button>
-        <button class="rate bad" data-rating="X">×</button>
-      </div>
-      <div class="history" id="studyHistory"></div>
-      <div class="buttonrow" style="margin-top:16px">
-        <button class="ghost" id="prevStudyBtn">前へ</button>
-        <button class="ghost" id="nextStudyBtn">次へ</button>
-      </div>
-    </div>
-    <div class="card">
-      <h2>今日の進捗</h2>
-      <div id="sessionProgress" class="sub"></div>
-      <div class="progress"><div id="sessionBar" style="width:0%"></div></div>
-    </div>
-  </section>
-
-  <section id="records" class="section">
-    <div class="card">
-      <h2>問題一覧</h2>
-      <label>問題集</label>
-      <select id="recordBookSelect"></select>
-      <label>表示</label>
-      <select id="recordFilter">
-        <option value="all">すべて</option>
-        <option value="X">×だけ</option>
-        <option value="T">△だけ</option>
-        <option value="O">○だけ</option>
-        <option value="U">未回答だけ</option>
-        <option value="due">復習期限が来ている問題</option>
-      </select>
-      <div id="recordList" style="margin-top:12px"></div>
-    </div>
-  </section>
-
-  <section id="settings" class="section">
-    <div class="card">
-      <h2>学習設定</h2>
-      <label>試験日</label>
-      <input type="date" id="examDate" />
-      <label>1日に無理なく進めたい新規問題数</label>
-      <input type="number" id="dailyNew" min="1" max="100" />
-      <label>1日に出す復習問題の上限</label>
-      <input type="number" id="dailyReview" min="1" max="100" />
-      <div class="notice">
-        できなかった分は消えずに翌日へ繰り越します。ただし、全部を一気に上乗せせず、翌日以降へ分散して現実的な量に調整します。
-      </div>
-      <button id="saveSettingsBtn" style="width:100%;margin-top:14px">設定を保存</button>
-    </div>
-
-    <div class="card">
-      <h2>問題集</h2>
-      <div id="bookList"></div>
-      <button class="secondary" id="addBookBtn" style="width:100%">問題集を追加</button>
-    </div>
-
-    <div class="card">
-      <h2>データ管理</h2>
-      <div class="buttonrow">
-        <button class="secondary" id="exportBtn">バックアップを書き出す</button>
-        <button class="secondary" id="importBtn">バックアップを読み込む</button>
-      </div>
-      <input type="file" id="importFile" accept="application/json" style="display:none" />
-      <button class="danger" id="resetBtn" style="width:100%;margin-top:10px">すべての記録を初期化</button>
-    </div>
-  </section>
+<section id="settings" class="section">
+ <div class="card"><h2>学習設定</h2><label>試験日</label><input type="date" id="examDate"><label>1日の新規問題数の目安</label><input type="number" id="dailyNew" min="1" max="100"><label>1日に出す復習問題の上限</label><input type="number" id="dailyReview" min="1" max="100"><div class="notice">未消化分は消さず、翌日以降へ少しずつ分散します。残り日数に対して設定数が少なければ、必要数まで自動で増やします。</div><button id="saveSettings" style="width:100%;margin-top:14px">設定を保存</button></div>
+ <div class="card"><h2>登録済み問題集</h2><div id="bookList"></div></div>
+ <div class="card"><h2>ChatGPTで分析</h2><div class="sub">簡易レポートは進捗・最近のペース・苦手分野を出力します。詳細レポートは全問題の履歴も含みます。</div><div class="buttonrow" style="margin-top:12px"><button id="copySimple">簡易レポートをコピー</button><button class="secondary" id="copyDetail">詳細レポートをコピー</button></div><div class="reportbox" id="reportPreview">ボタンを押すと、ここに出力内容を表示します。</div></div>
+ <div class="card"><h2>データ管理</h2><div class="buttonrow"><button class="secondary" id="exportBtn">バックアップ</button><button class="secondary" id="importBtn">読み込み</button></div><input type="file" id="importFile" accept="application/json" style="display:none"><button class="danger" id="resetBtn" style="width:100%;margin-top:10px">すべての記録を初期化</button></div>
+</section>
 </main>
-
-<nav class="tabs">
-  <button class="tab active" data-target="home"><span>⌂</span>ホーム</button>
-  <button class="tab" data-target="study"><span>✎</span>学習</button>
-  <button class="tab" data-target="records"><span>☷</span>記録</button>
-  <button class="tab" data-target="settings"><span>⚙</span>設定</button>
-</nav>
-
-<div class="modal" id="bookModal">
-  <div class="sheet">
-    <div class="sheethead"><h2 id="bookModalTitle">問題集を追加</h2><button class="close" id="closeBookModal">×</button></div>
-    <input type="hidden" id="editBookId" />
-    <label>問題集のタイトル</label>
-    <input id="bookTitleInput" placeholder="例：権利関係" />
-    <label>問題数</label>
-    <input type="number" id="bookCountInput" min="1" max="3000" placeholder="例：200" />
-    <button id="saveBookBtn" style="width:100%;margin-top:16px">保存</button>
-  </div>
-</div>
+<nav class="tabs"><button class="tab active" data-tab="home"><span>⌂</span>ホーム</button><button class="tab" data-tab="study"><span>✎</span>学習</button><button class="tab" data-tab="records"><span>☷</span>記録</button><button class="tab" data-tab="settings"><span>⚙</span>設定</button></nav>
 
 <script>
-(() => {
-  const STORAGE_KEY = 'takkenStudyNav_v010';
-  const VERSION = '0.1.0';
-  const DAY = 86400000;
-  let studyIndex = 0;
+(()=>{
+const KEY='takkenStudyNav_v010',VERSION='0.2.0',DAY=86400000;
+let studyIndex=0;
 
-  const todayISO = () => {
-    const d = new Date();
-    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
-    return `${y}-${m}-${day}`;
-  };
-  const addDays = (iso, n) => {
-    const d = new Date(iso + 'T12:00:00');
-    d.setDate(d.getDate() + n);
-    return d.toISOString().slice(0,10);
-  };
-  const daysBetween = (a,b) => Math.ceil((new Date(b+'T12:00:00') - new Date(a+'T12:00:00'))/DAY);
-  const clamp = (n,min,max) => Math.max(min,Math.min(max,n));
+const BOOKS=[
+{id:'book1',title:'権利関係',count:169,order:1},
+{id:'book2',title:'宅建業法',count:180,order:2},
+{id:'book3',title:'法令上の制限・税・その他',count:185,order:3}
+];
 
-  function initialState(){
-    return {
-      version: VERSION,
-      settings:{
-        examDate:'2026-10-18',
-        dailyNew:10,
-        dailyReview:10
-      },
-      books:[
-        {id:'book2',title:'宅建業法',count:180,order:2}
-      ],
-      results:{
-        book2:{
-          '1':{rating:'X',history:[{date:'2026-07-28',rating:'X'}],nextDue:'2026-07-29',streak:0},
-          '2':{rating:'O',history:[{date:'2026-07-28',rating:'O'}],nextDue:'2026-08-04',streak:1},
-          '3':{rating:'X',history:[{date:'2026-07-28',rating:'X'}],nextDue:'2026-07-29',streak:0},
-          '4':{rating:'O',history:[{date:'2026-07-28',rating:'O'}],nextDue:'2026-08-04',streak:1}
-        }
-      },
-      dailyPlans:{},
-      carryover:0
-    };
-  }
+const CATEGORIES={
+book1:[
+[1,'意思表示'],[8,'制限行為能力者'],[11,'時効'],[26,'代理'],[35,'債務不履行・解除'],[36,'危険負担'],[39,'弁済'],[47,'契約不適合責任'],[58,'相続'],[67,'物権変動'],[75,'不動産登記法'],[81,'抵当権'],[83,'根抵当権'],[84,'保証債務・連帯保証'],[85,'保証債務'],[87,'連帯保証'],[88,'連帯債務'],[91,'共有'],[95,'建物区分所有法'],[102,'区分所有建物の登記'],[103,'賃貸借'],[108,'借地借家法（借家）'],[119,'借地借家法（借地）'],[129,'不法行為'],[137,'請負'],[139,'委任'],[141,'債権譲渡'],[144,'地役権'],[145,'相隣関係'],[146,'占有権'],[147,'留置権'],[148,'質権'],[149,'相殺'],[150,'贈与'],[151,'民法総合'],[154,'令和6年度本試験問題']],
+book2:[
+[1,'宅建業の意味'],[10,'事務所の設置'],[13,'免許の申請'],[17,'免許の効力'],[22,'免許取消'],[23,'事務所以外の場所の規制'],[27,'宅地建物取引士の登録'],[34,'宅地建物取引士証'],[37,'宅地建物取引士総合'],[46,'手続きの総合問題'],[52,'営業保証金'],[61,'弁済業務保証金'],[70,'保証金総合'],[71,'媒介・代理契約'],[82,'広告等に関する規制'],[87,'重要事項の説明'],[98,'37条書面'],[107,'35条・37条書面'],[108,'その他の業務上の規制'],[110,'クーリング・オフ'],[116,'手付金等の保全措置'],[120,'自己所有に属しない物件の契約締結の制限'],[121,'担保責任についての特約の制限'],[122,'自ら売主制限総合'],[131,'住宅瑕疵担保履行法'],[135,'業務上の規制総合'],[145,'報酬額の制限'],[150,'監督・罰則'],[155,'宅建業法の総合問題'],[161,'令和6年度本試験問題']],
+book3:[
+[1,'都市計画の内容'],[9,'開発行為の規制'],[27,'都市計画制限等'],[29,'都市計画法総合'],[33,'用途規制'],[37,'容積率'],[38,'建ぺい率・容積率'],[40,'高さ制限'],[43,'道路規制'],[46,'防火・準防火地域'],[49,'単体規定'],[52,'建築協定'],[53,'建築確認'],[59,'建築基準法総合'],[74,'国土利用計画法'],[83,'農地法'],[94,'土地区画整理法'],[105,'盛土規制法'],[111,'その他の法令上の制限'],[116,'不動産取得税'],[122,'固定資産税'],[127,'地方税'],[128,'所得税'],[134,'印紙税'],[141,'登録免許税'],[146,'贈与税'],[147,'地価公示法'],[154,'不動産鑑定評価基準'],[158,'住宅金融支援機構法'],[163,'景品表示法'],[172,'土地'],[179,'建物']]
+};
 
-  let state = load();
-  function load(){
-    try{
-      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      return parsed || initialState();
-    }catch(e){ return initialState(); }
-  }
-  function save(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const addDays=(iso,n)=>{const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const daysBetween=(a,b)=>Math.ceil((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/DAY);
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+const sym=r=>r==='O'?'○':r==='T'?'△':r==='X'?'×':'—';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-  function allQuestions(){
-    const arr=[];
-    state.books.sort((a,b)=>a.order-b.order).forEach(book=>{
-      for(let n=1;n<=book.count;n++) arr.push({bookId:book.id,n});
-    });
-    return arr;
-  }
-  function getResult(bookId,n){
-    return state.results?.[bookId]?.[String(n)] || null;
-  }
-  function ensureBookResult(bookId){
-    if(!state.results[bookId]) state.results[bookId]={};
-  }
-  function lastRating(bookId,n){
-    return getResult(bookId,n)?.rating || 'U';
-  }
-  function totalStats(){
-    const s={O:0,T:0,X:0,U:0,total:0};
-    allQuestions().forEach(q=>{s[lastRating(q.bookId,q.n)]++;s.total++;});
-    return s;
-  }
-  function bookById(id){return state.books.find(b=>b.id===id);}
+function initial(){
+ return {version:VERSION,settings:{examDate:'2026-10-18',dailyNew:10,dailyReview:10},books:structuredClone(BOOKS),results:{book1:{},book2:{
+ '1':{rating:'X',history:[{date:'2026-07-28',rating:'X'}],nextDue:'2026-07-29',streak:0},
+ '2':{rating:'O',history:[{date:'2026-07-28',rating:'O'}],nextDue:'2026-08-04',streak:1},
+ '3':{rating:'X',history:[{date:'2026-07-28',rating:'X'}],nextDue:'2026-07-29',streak:0},
+ '4':{rating:'O',history:[{date:'2026-07-28',rating:'O'}],nextDue:'2026-08-04',streak:1}},book3:{}},dailyPlans:{},carryover:0};
+}
+function load(){
+ try{
+  const old=JSON.parse(localStorage.getItem(KEY));
+  if(!old)return initial();
+  old.settings=old.settings||initial().settings;
+  old.results=old.results||{};
+  BOOKS.forEach(b=>{if(!old.results[b.id])old.results[b.id]={}});
+  const changed=old.version!==VERSION||!old.books||old.books.length!==3;
+  old.books=structuredClone(BOOKS);old.version=VERSION;
+  if(changed)old.dailyPlans={};
+  localStorage.setItem(KEY,JSON.stringify(old));
+  return old;
+ }catch(e){return initial()}
+}
+let state=load();
+const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
+const book=id=>state.books.find(b=>b.id===id);
+const result=(id,n)=>state.results?.[id]?.[String(n)]||null;
+const rating=(id,n)=>result(id,n)?.rating||'U';
+function category(id,n){const arr=CATEGORIES[id]||[];let name='分類未登録';for(const [start,title] of arr){if(n>=start)name=title;else break}return name}
+function allQuestions(){const a=[];state.books.sort((x,y)=>x.order-y.order).forEach(b=>{for(let n=1;n<=b.count;n++)a.push({bookId:b.id,n})});return a}
+function statsFor(id=null){const s={O:0,T:0,X:0,U:0,total:0};allQuestions().filter(q=>!id||q.bookId===id).forEach(q=>{s[rating(q.bookId,q.n)]++;s.total++});return s}
+function dueQuestions(){return allQuestions().filter(q=>{const r=result(q.bookId,q.n);return r?.nextDue&&r.nextDue<=today()}).sort((a,b)=>{const p={X:0,T:1,O:2};const ra=result(a.bookId,a.n),rb=result(b.bookId,b.n);return p[ra.rating]-p[rb.rating]||ra.nextDue.localeCompare(rb.nextDue)})}
+function unansweredByBook(id){const b=book(id),a=[];for(let n=1;n<=b.count;n++)if(!result(id,n))a.push({bookId:id,n});return a}
+function balancedFresh(target){
+ const pools=state.books.map(b=>unansweredByBook(b.id));const out=[];let i=0;
+ while(out.length<target&&pools.some(p=>p.length)){const p=pools[i%pools.length];if(p.length)out.push({...p.shift(),type:'new'});i++}
+ return out;
+}
+function carryover(){
+ let c=0;Object.keys(state.dailyPlans||{}).filter(d=>d<today()).forEach(d=>{const p=state.dailyPlans[d],done=new Set((p.completed||[]).map(x=>`${x.bookId}:${x.n}`));(p.items||[]).filter(x=>x.type==='new').forEach(x=>{if(!done.has(`${x.bookId}:${x.n}`)&&!result(x.bookId,x.n))c++})});state.carryover=c;save()
+}
+function newTarget(){const left=Math.max(1,daysBetween(today(),state.settings.examDate)),remaining=statsFor().U,needed=Math.ceil(remaining/left),base=Number(state.settings.dailyNew)||10,boost=Math.min(Math.ceil((state.carryover||0)/5),Math.max(2,Math.ceil(base*.5)));return clamp(Math.max(base,needed)+boost,1,100)}
+function plan(force=false){const d=today();if(!force&&state.dailyPlans[d])return state.dailyPlans[d];const reviews=dueQuestions().slice(0,Number(state.settings.dailyReview)||10).map(q=>({...q,type:'review'}));const items=[...reviews,...balancedFresh(newTarget())];state.dailyPlans[d]={date:d,items,completed:[]};save();return state.dailyPlans[d]}
+function planStatus(){const p=plan();return p.items.map(x=>({...x,done:(p.completed||[]).some(y=>y.bookId===x.bookId&&y.n===x.n)}))}
+function nextSchedule(old,r){const streak=r==='O'?(old?.streak||0)+1:0;let days=r==='X'?1:r==='T'?3:streak<=1?7:streak===2?14:30;if(daysBetween(today(),state.settings.examDate)<=14&&(r==='X'||r==='T'))days=Math.min(days,2);return {streak,nextDue:addDays(today(),days)}}
+function rateQuestion(q,r){
+ if(!state.results[q.bookId])state.results[q.bookId]={};const old=result(q.bookId,q.n)||{history:[],streak:0},sch=nextSchedule(old,r);
+ state.results[q.bookId][String(q.n)]={rating:r,history:[...(old.history||[]),{date:today(),rating:r}],streak:sch.streak,nextDue:sch.nextDue};
+ const p=plan();if(!(p.completed||[]).some(x=>x.bookId===q.bookId&&x.n===q.n))p.completed.push({bookId:q.bookId,n:q.n});
+ carryover();save();studyIndex=0;renderAll()
+}
+function renderHome(){
+ carryover();const s=statsFor(),days=Math.max(0,daysBetween(today(),state.settings.examDate)),answered=s.total-s.U,pct=s.total?Math.round(answered/s.total*100):0,need=days?Math.ceil(s.U/days):s.U;
+ document.getElementById('examLabel').textContent=`${state.settings.examDate.replaceAll('-','/')}まで`;document.getElementById('countdown').textContent=`あと${days}日`;document.getElementById('paceText').textContent=s.U?`未回答${s.U}問。1周するには平均1日${need}問必要です。`:'全問題を1周済み。復習中心です。';document.getElementById('overallProgress').style.width=pct+'%';document.getElementById('overallText').textContent=`全${s.total}問中 ${answered}問回答（${pct}%）`;
+ ['O','T','X','U'].forEach(k=>document.getElementById('stat'+k).textContent=s[k]);
+ const items=planStatus(),done=items.filter(x=>x.done).length;document.getElementById('todaySummary').textContent=`新規${items.filter(x=>x.type==='new').length}問＋復習${items.filter(x=>x.type==='review').length}問（完了 ${done}/${items.length}）`;
+ document.getElementById('todayList').innerHTML=items.map(x=>`<span class="chip ${x.type==='review'?'review':''}">${esc(book(x.bookId).title)} ${x.n}${x.done?' ✓':''}</span>`).join('')||'<span class="sub">今日の問題はありません</span>';
+ document.getElementById('carryNotice').textContent=state.carryover?`未消化の新規問題が${state.carryover}問あります。数日へ分散して少しずつ追加します。`:'未消化の繰越はありません。';
+ document.getElementById('bookProgress').innerHTML=state.books.map(b=>{const bs=statsFor(b.id),a=bs.total-bs.U,p=Math.round(a/bs.total*100);return `<div class="book"><div class="bookhead"><div><strong>${esc(b.title)}</strong><div class="tiny">${a}/${bs.total}問　○${bs.O} △${bs.T} ×${bs.X}</div></div><span class="badge">${p}%</span></div><div class="progress"><div style="width:${p}%"></div></div></div>`}).join('');
+}
+function renderStudy(){
+ const all=planStatus(),unfinished=all.filter(x=>!x.done),display=unfinished.length?unfinished:all;if(studyIndex>=display.length)studyIndex=0;const q=display[studyIndex];
+ if(!q){document.getElementById('studyBook').textContent='今日の問題';document.getElementById('studyNo').textContent='完了';document.getElementById('studyCategory').textContent='';document.getElementById('studyReason').textContent='今日のメニューはすべて終わりました';document.getElementById('studyHistory').textContent=''}
+ else{document.getElementById('studyBook').textContent=book(q.bookId).title;document.getElementById('studyNo').textContent=`第${q.n}問`;document.getElementById('studyCategory').textContent=category(q.bookId,q.n);document.getElementById('studyReason').textContent=q.type==='review'?'復習問題':q.type==='manual'?'指定した問題':'新しい問題';const r=result(q.bookId,q.n);document.getElementById('studyHistory').textContent=r?.history?.length?'履歴：'+r.history.map(h=>`${h.date.slice(5)} ${sym(h.rating)}`).join(' → '):'まだ記録はありません'}
+ document.querySelectorAll('.rate').forEach(btn=>{btn.disabled=!q;btn.onclick=()=>q&&rateQuestion(q,btn.dataset.rate)});
+ document.getElementById('prevBtn').onclick=()=>{if(display.length){studyIndex=(studyIndex-1+display.length)%display.length;renderStudy()}};document.getElementById('nextBtn').onclick=()=>{if(display.length){studyIndex=(studyIndex+1)%display.length;renderStudy()}};
+ const done=all.filter(x=>x.done).length;document.getElementById('sessionText').textContent=`${done}/${all.length}問 完了`;document.getElementById('sessionBar').style.width=(all.length?done/all.length*100:100)+'%';
+}
+function renderRecords(){
+ const sel=document.getElementById('recordBook'),cur=sel.value;sel.innerHTML=state.books.map(b=>`<option value="${b.id}">${esc(b.title)}</option>`).join('');if(book(cur))sel.value=cur;const b=book(sel.value)||state.books[0],f=document.getElementById('recordFilter').value,rows=[];
+ for(let n=1;n<=b.count;n++){const r=result(b.id,n),st=r?.rating||'U';if(f==='all'||f===st||(f==='due'&&r?.nextDue&&r.nextDue<=today()))rows.push({n,r,st})}
+ document.getElementById('recordList').innerHTML=rows.map(x=>`<div class="listrow" data-q="${b.id}:${x.n}"><div><strong>第${x.n}問</strong><div class="tiny">${esc(category(b.id,x.n))}・${x.r?.nextDue?'次回 '+x.r.nextDue:'未回答'}</div></div><div class="status ${x.st==='O'?'ok':x.st==='T'?'mid':x.st==='X'?'bad':''}">${sym(x.st)}</div></div>`).join('')||'<div class="sub">該当なし</div>';
+ document.querySelectorAll('[data-q]').forEach(el=>el.onclick=()=>{const [id,n]=el.dataset.q.split(':');const p=plan();if(!p.items.some(x=>x.bookId===id&&x.n===Number(n)))p.items.unshift({bookId:id,n:Number(n),type:'manual'});save();studyIndex=0;switchTab('study')})
+}
+function renderSettings(){
+ document.getElementById('examDate').value=state.settings.examDate;document.getElementById('dailyNew').value=state.settings.dailyNew;document.getElementById('dailyReview').value=state.settings.dailyReview;
+ document.getElementById('bookList').innerHTML=state.books.map(b=>`<div class="book"><div class="bookhead"><div><strong>${esc(b.title)}</strong><div class="tiny">全${b.count}問・分野分類登録済み</div></div><span class="badge">問題集${b.order}</span></div></div>`).join('');
+}
+function recent7(){const start=addDays(today(),-6);let attempts=0,newQs=new Set(),reviews=0;Object.entries(state.results).forEach(([id,rs])=>Object.entries(rs).forEach(([n,r])=>(r.history||[]).forEach((h,i)=>{if(h.date>=start&&h.date<=today()){attempts++;if(i===0)newQs.add(`${id}:${n}`);else reviews++}})));return {attempts,newCount:newQs.size,reviews}}
+function categoryStats(){
+ const map={};allQuestions().forEach(q=>{const key=`${book(q.bookId).title}｜${category(q.bookId,q.n)}`;if(!map[key])map[key]={O:0,T:0,X:0,U:0,total:0,wrong:0};const st=rating(q.bookId,q.n);map[key][st]++;map[key].total++;const r=result(q.bookId,q.n);map[key].wrong+=(r?.history||[]).filter(h=>h.rating==='X').length});
+ return Object.entries(map).map(([name,s])=>({name,...s,answered:s.total-s.U})).filter(x=>x.answered>0).sort((a,b)=>(b.wrong+b.X*2+b.T)-(a.wrong+a.X*2+a.T));
+}
+function makeReport(detail=false){
+ const s=statsFor(),days=Math.max(0,daysBetween(today(),state.settings.examDate)),need=days?Math.ceil(s.U/days):s.U,r7=recent7(),cats=categoryStats().slice(0,15);
+ let t=`【宅建学習分析レポート】\n出力日：${today()}\n試験日：${state.settings.examDate}\n残り日数：${days}日\n\n■全体\n総問題数：${s.total}\n回答済：${s.total-s.U}\n未回答：${s.U}\n○：${s.O}\n△：${s.T}\n×：${s.X}\n1周に必要な平均新規問題数：1日${need}問\n現在の新規設定：1日${state.settings.dailyNew}問\n復習上限：1日${state.settings.dailyReview}問\n繰越：${state.carryover||0}問\n\n■問題集別\n`;
+ state.books.forEach(b=>{const x=statsFor(b.id);t+=`${b.title}：${x.total-x.U}/${x.total}問（○${x.O} △${x.T} ×${x.X} 未回答${x.U}）\n`});
+ t+=`\n■最近7日\n回答操作：${r7.attempts}回\n初めて解いた問題：${r7.newCount}問\n再回答・復習：${r7.reviews}回\n\n■苦手分野（上位）\n`;
+ t+=cats.length?cats.map((x,i)=>`${i+1}. ${x.name}：○${x.O} △${x.T} ×${x.X}／×履歴${x.wrong}回`).join('\n'):'まだ分析できる回答がありません。';
+ t+=`\n\n■ChatGPTへの依頼\nこのレポートをもとに、試験日までに1周と復習を間に合わせるため、今後1週間の新規問題数・復習数・重点分野を具体的に提案してください。現在のペースで不足する場合は、1日何問へ増やすべきかも計算してください。`;
+ if(detail){t+=`\n\n■全問題の履歴\n`;state.books.forEach(b=>{t+=`\n【${b.title}】\n`;for(let n=1;n<=b.count;n++){const r=result(b.id,n);if(r?.history?.length)t+=`問${n}｜${category(b.id,n)}｜${r.history.map(h=>`${h.date}:${sym(h.rating)}`).join(',')}｜次回${r.nextDue||'-'}\n`}})}
+ return t;
+}
+async function copyReport(detail){
+ const text=makeReport(detail);document.getElementById('reportPreview').textContent=text;
+ try{await navigator.clipboard.writeText(text);alert(detail?'詳細レポートをコピーしました':'簡易レポートをコピーしました')}catch(e){alert('自動コピーできませんでした。表示された文章を長押ししてコピーしてください。')}
+}
+function renderAll(){renderHome();renderStudy();renderRecords();renderSettings()}
+function switchTab(id){document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));if(id==='records')renderRecords();if(id==='study')renderStudy();scrollTo({top:0,behavior:'smooth'})}
+function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`takken_backup_${today()}.json`;a.click();URL.revokeObjectURL(u)}
+function importData(file){const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!d.results||!d.settings)throw 0;state=d;state.books=structuredClone(BOOKS);BOOKS.forEach(b=>state.results[b.id]=state.results[b.id]||{});state.version=VERSION;state.dailyPlans={};save();renderAll();alert('読み込みました')}catch(e){alert('読み込めないファイルです')}};rd.readAsText(file)}
 
-  function dueQuestions(date=todayISO()){
-    return allQuestions().filter(q=>{
-      const r=getResult(q.bookId,q.n);
-      return r && r.nextDue && r.nextDue<=date;
-    }).sort((a,b)=>{
-      const ra=getResult(a.bookId,a.n), rb=getResult(b.bookId,b.n);
-      const priority={X:0,T:1,O:2};
-      return (priority[ra.rating]-priority[rb.rating]) || ra.nextDue.localeCompare(rb.nextDue) || a.n-b.n;
-    });
-  }
+document.querySelectorAll('.tab').forEach(x=>x.onclick=()=>switchTab(x.dataset.tab));
+document.getElementById('startBtn').onclick=()=>{studyIndex=0;switchTab('study')};
+document.getElementById('rebuildBtn').onclick=()=>{if(confirm('今日の完了記録を残してメニューを組み直しますか？')){const old=state.dailyPlans[today()],done=old?.completed||[];delete state.dailyPlans[today()];const p=plan(true);p.completed=done;save();renderAll()}};
+document.getElementById('recordBook').onchange=renderRecords;document.getElementById('recordFilter').onchange=renderRecords;
+document.getElementById('saveSettings').onclick=()=>{state.settings.examDate=document.getElementById('examDate').value||'2026-10-18';state.settings.dailyNew=clamp(Number(document.getElementById('dailyNew').value)||10,1,100);state.settings.dailyReview=clamp(Number(document.getElementById('dailyReview').value)||10,1,100);state.dailyPlans={};save();renderAll();alert('保存しました')};
+document.getElementById('copySimple').onclick=()=>copyReport(false);document.getElementById('copyDetail').onclick=()=>copyReport(true);
+document.getElementById('exportBtn').onclick=exportData;document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();document.getElementById('importFile').onchange=e=>e.target.files[0]&&importData(e.target.files[0]);
+document.getElementById('resetBtn').onclick=()=>{if(confirm('すべての記録を初期化しますか？')){state=initial();save();renderAll()}};
 
-  function unanswered(){
-    return allQuestions().filter(q=>!getResult(q.bookId,q.n));
-  }
-
-  function computeNewTarget(){
-    const left = Math.max(1,daysBetween(todayISO(),state.settings.examDate));
-    const remaining = unanswered().length;
-    const needed = Math.ceil(remaining/left);
-    const base = Number(state.settings.dailyNew)||10;
-    const carryBoost = Math.min(Math.ceil((state.carryover||0)/5), Math.max(2,Math.ceil(base*.5)));
-    return clamp(Math.max(needed,base)+carryBoost,1,100);
-  }
-
-  function buildTodayPlan(force=false){
-    const date=todayISO();
-    if(!force && state.dailyPlans[date]) return state.dailyPlans[date];
-
-    const due=dueQuestions(date);
-    const reviewCap=Math.max(1,Number(state.settings.dailyReview)||10);
-    const reviews=due.slice(0,reviewCap).map(q=>({...q,type:'review'}));
-
-    const newTarget=computeNewTarget();
-    const fresh=unanswered().slice(0,newTarget).map(q=>({...q,type:'new'}));
-
-    const items=[...reviews,...fresh];
-    state.dailyPlans[date]={date,items,completed:[],createdAt:new Date().toISOString()};
-    save();
-    return state.dailyPlans[date];
-  }
-
-  function updateCarryover(){
-    const keys=Object.keys(state.dailyPlans).filter(d=>d<todayISO()).sort();
-    let carry=0;
-    keys.forEach(d=>{
-      const p=state.dailyPlans[d];
-      const completed=new Set((p.completed||[]).map(x=>`${x.bookId}:${x.n}`));
-      p.items.filter(x=>x.type==='new').forEach(x=>{
-        if(!completed.has(`${x.bookId}:${x.n}`) && !getResult(x.bookId,x.n)) carry++;
-      });
-    });
-    state.carryover=carry;
-    save();
-  }
-
-  function scheduleNext(existing,newRating){
-    const streak = newRating==='O' ? ((existing?.streak||0)+1) : 0;
-    let interval;
-    if(newRating==='X') interval=1;
-    else if(newRating==='T') interval=3;
-    else interval = streak<=1 ? 7 : streak===2 ? 14 : 30;
-    const daysLeft=daysBetween(todayISO(),state.settings.examDate);
-    if(daysLeft<=14 && (newRating==='X'||newRating==='T')) interval=Math.min(interval,2);
-    return {nextDue:addDays(todayISO(),interval),streak};
-  }
-
-  function rateQuestion(q,rating){
-    ensureBookResult(q.bookId);
-    const key=String(q.n);
-    const old=state.results[q.bookId][key]||{history:[],streak:0};
-    const sched=scheduleNext(old,rating);
-    state.results[q.bookId][key]={
-      rating,
-      history:[...(old.history||[]),{date:todayISO(),rating}],
-      nextDue:sched.nextDue,
-      streak:sched.streak
-    };
-    const plan=buildTodayPlan();
-    if(!plan.completed) plan.completed=[];
-    if(!plan.completed.some(x=>x.bookId===q.bookId&&x.n===q.n)) plan.completed.push({bookId:q.bookId,n:q.n});
-    updateCarryover();
-    save();
-    renderAll();
-  }
-
-  function planWithStatus(){
-    const p=buildTodayPlan();
-    return p.items.map(q=>({...q,done:(p.completed||[]).some(x=>x.bookId===q.bookId&&x.n===q.n)}));
-  }
-
-  function renderHome(){
-    updateCarryover();
-    const stats=totalStats();
-    const days=Math.max(0,daysBetween(todayISO(),state.settings.examDate));
-    document.getElementById('countdown').textContent=`あと${days}日`;
-    const remaining=stats.U;
-    const needed=days>0?Math.ceil(remaining/days):remaining;
-    document.getElementById('paceText').textContent=
-      remaining===0 ? '全問題を一度は解き終えています。ここからは復習中心です。' :
-      `未回答は${remaining}問。締切まで平均1日${needed}問で1周できます。`;
-    const answered=stats.total-stats.U;
-    const pct=stats.total?Math.round(answered/stats.total*100):0;
-    document.getElementById('overallProgress').style.width=pct+'%';
-    document.getElementById('overallText').textContent=`全${stats.total}問中 ${answered}問回答（${pct}%）`;
-    ['O','T','X','U'].forEach(k=>document.getElementById('stat'+k).textContent=stats[k]);
-
-    const items=planWithStatus();
-    const newCount=items.filter(x=>x.type==='new').length;
-    const revCount=items.filter(x=>x.type==='review').length;
-    const done=items.filter(x=>x.done).length;
-    document.getElementById('todaySummary').textContent=`新規${newCount}問＋復習${revCount}問（完了 ${done}/${items.length}）`;
-    const box=document.getElementById('todayList');
-    box.innerHTML='';
-    items.forEach(q=>{
-      const chip=document.createElement('div');
-      chip.className='chip '+(q.type==='review'?'review':'')+(q.done?'':'');
-      chip.textContent=`${bookById(q.bookId)?.title || ''} ${q.n}${q.done?' ✓':''}`;
-      box.appendChild(chip);
-    });
-    if(!items.length) box.innerHTML='<div class="empty">今日の問題はありません</div>';
-    const carry=state.carryover||0;
-    document.getElementById('carryNotice').textContent = carry>0
-      ? `未消化の新規問題が${carry}問あります。全部を明日に詰め込まず、今後数日に少しずつ分散して追加します。`
-      : '未消化の繰越はありません。';
-  }
-
-  function renderStudy(){
-    const items=planWithStatus();
-    const unfinished=items.filter(x=>!x.done);
-    const display=unfinished.length?unfinished:items;
-    if(studyIndex>=display.length) studyIndex=0;
-    const q=display[studyIndex];
-    if(!q){
-      document.getElementById('studyBook').textContent='今日の問題';
-      document.getElementById('studyNo').textContent='完了';
-      document.getElementById('studyReason').textContent='今日のメニューはすべて終わりました';
-      document.getElementById('studyHistory').textContent='';
-    }else{
-      document.getElementById('studyBook').textContent=bookById(q.bookId)?.title||'問題集';
-      document.getElementById('studyNo').textContent=`第${q.n}問`;
-      document.getElementById('studyReason').textContent=q.type==='review'?'復習問題':'新しい問題';
-      const r=getResult(q.bookId,q.n);
-      document.getElementById('studyHistory').textContent=r?.history?.length
-        ? '履歴：'+r.history.map(h=>`${h.date.slice(5)} ${symbol(h.rating)}`).join(' → ')
-        : 'まだ記録はありません';
-    }
-    document.querySelectorAll('.rate').forEach(b=>{
-      b.disabled=!q;
-      b.onclick=()=>{ if(q){rateQuestion(q,b.dataset.rating); studyIndex=0;} };
-    });
-    document.getElementById('prevStudyBtn').onclick=()=>{if(display.length){studyIndex=(studyIndex-1+display.length)%display.length;renderStudy();}};
-    document.getElementById('nextStudyBtn').onclick=()=>{if(display.length){studyIndex=(studyIndex+1)%display.length;renderStudy();}};
-    const done=items.filter(x=>x.done).length;
-    document.getElementById('sessionProgress').textContent=`${done}/${items.length}問 完了`;
-    document.getElementById('sessionBar').style.width=(items.length?done/items.length*100:100)+'%';
-  }
-
-  function symbol(r){return r==='O'?'○':r==='T'?'△':r==='X'?'×':'—';}
-
-  function renderRecords(){
-    const sel=document.getElementById('recordBookSelect');
-    const current=sel.value;
-    sel.innerHTML=state.books.map(b=>`<option value="${b.id}">${escapeHtml(b.title)}</option>`).join('');
-    if(state.books.some(b=>b.id===current)) sel.value=current;
-    const book=bookById(sel.value)||state.books[0];
-    if(!book) return;
-    const filter=document.getElementById('recordFilter').value;
-    const list=document.getElementById('recordList');
-    const rows=[];
-    for(let n=1;n<=book.count;n++){
-      const r=getResult(book.id,n), status=r?.rating||'U';
-      let show=filter==='all'||filter===status||(filter==='due'&&r?.nextDue&&r.nextDue<=todayISO());
-      if(show) rows.push({n,r,status});
-    }
-    list.innerHTML=rows.length?rows.map(x=>`
-      <div class="listrow" data-jump="${book.id}:${x.n}">
-        <div><strong>第${x.n}問</strong><div class="tiny">${x.r?.nextDue?'次回 '+x.r.nextDue:'未回答'}</div></div>
-        <div class="status ${x.status==='O'?'oktxt':x.status==='T'?'midtxt':x.status==='X'?'badtxt':''}">${symbol(x.status)}</div>
-      </div>`).join(''):'<div class="empty">該当する問題はありません</div>';
-    list.querySelectorAll('[data-jump]').forEach(el=>{
-      el.onclick=()=>{
-        const [bookId,n]=el.dataset.jump.split(':');
-        const p=buildTodayPlan();
-        if(!p.items.some(x=>x.bookId===bookId&&x.n===Number(n))) p.items.unshift({bookId,n:Number(n),type:'manual'});
-        studyIndex=0; save(); switchTab('study');
-      };
-    });
-  }
-
-  function renderSettings(){
-    document.getElementById('examDate').value=state.settings.examDate;
-    document.getElementById('dailyNew').value=state.settings.dailyNew;
-    document.getElementById('dailyReview').value=state.settings.dailyReview;
-    const box=document.getElementById('bookList');
-    box.innerHTML=state.books.sort((a,b)=>a.order-b.order).map(b=>`
-      <div class="book">
-        <div class="bookhead">
-          <div><strong>${escapeHtml(b.title)}</strong><div class="tiny">全${b.count}問</div></div>
-          <span class="badge">問題集${b.order}</span>
-        </div>
-        <div class="buttonrow" style="margin-top:10px">
-          <button class="secondary edit-book" data-id="${b.id}">編集</button>
-          <button class="danger delete-book" data-id="${b.id}">削除</button>
-        </div>
-      </div>`).join('');
-    box.querySelectorAll('.edit-book').forEach(btn=>btn.onclick=()=>openBookModal(btn.dataset.id));
-    box.querySelectorAll('.delete-book').forEach(btn=>btn.onclick=()=>deleteBook(btn.dataset.id));
-  }
-
-  function renderAll(){renderHome();renderStudy();renderRecords();renderSettings();}
-
-  function switchTab(id){
-    document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id));
-    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.target===id));
-    if(id==='records') renderRecords();
-    if(id==='study') renderStudy();
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
-
-  function openBookModal(id=''){
-    const b=id?bookById(id):null;
-    document.getElementById('bookModalTitle').textContent=b?'問題集を編集':'問題集を追加';
-    document.getElementById('editBookId').value=id;
-    document.getElementById('bookTitleInput').value=b?.title||'';
-    document.getElementById('bookCountInput').value=b?.count||'';
-    document.getElementById('bookModal').classList.add('open');
-  }
-  function closeBookModal(){document.getElementById('bookModal').classList.remove('open');}
-  function saveBook(){
-    const id=document.getElementById('editBookId').value;
-    const title=document.getElementById('bookTitleInput').value.trim();
-    const count=Number(document.getElementById('bookCountInput').value);
-    if(!title||!Number.isInteger(count)||count<1){alert('タイトルと問題数を入力してください');return;}
-    if(id){
-      const b=bookById(id);
-      if(count<b.count && !confirm('問題数を減らすと、範囲外の記録は表示されなくなります。続けますか？')) return;
-      b.title=title;b.count=count;
-    }else{
-      const newId='book_'+Date.now();
-      const used=state.books.map(b=>b.order);
-      let order=1;while(used.includes(order))order++;
-      state.books.push({id:newId,title,count,order});
-      state.results[newId]={};
-    }
-    state.dailyPlans={};
-    save();closeBookModal();renderAll();
-  }
-  function deleteBook(id){
-    const b=bookById(id);
-    if(!b||!confirm(`「${b.title}」と記録を削除しますか？`)) return;
-    state.books=state.books.filter(x=>x.id!==id);
-    delete state.results[id];
-    state.dailyPlans={};
-    save();renderAll();
-  }
-
-  function exportData(){
-    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;a.download=`takken_backup_${todayISO()}.json`;a.click();
-    URL.revokeObjectURL(url);
-  }
-  function importData(file){
-    const reader=new FileReader();
-    reader.onload=()=>{
-      try{
-        const data=JSON.parse(reader.result);
-        if(!data.books||!data.settings||!data.results) throw new Error();
-        state=data;save();renderAll();alert('バックアップを読み込みました');
-      }catch(e){alert('読み込めないファイルです');}
-    };
-    reader.readAsText(file);
-  }
-  function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-
-  document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.target));
-  document.getElementById('startTodayBtn').onclick=()=>{studyIndex=0;switchTab('study');};
-  document.getElementById('rebuildTodayBtn').onclick=()=>{
-    if(confirm('今日の進捗を残したまま、未完了分を現在の条件で組み直しますか？')){
-      const old=state.dailyPlans[todayISO()];
-      const completed=old?.completed||[];
-      delete state.dailyPlans[todayISO()];
-      const p=buildTodayPlan(true);p.completed=completed;save();renderAll();
-    }
-  };
-  document.getElementById('recordBookSelect').onchange=renderRecords;
-  document.getElementById('recordFilter').onchange=renderRecords;
-  document.getElementById('saveSettingsBtn').onclick=()=>{
-    state.settings.examDate=document.getElementById('examDate').value||'2026-10-18';
-    state.settings.dailyNew=clamp(Number(document.getElementById('dailyNew').value)||10,1,100);
-    state.settings.dailyReview=clamp(Number(document.getElementById('dailyReview').value)||10,1,100);
-    state.dailyPlans={};
-    save();renderAll();alert('設定を保存しました');
-  };
-  document.getElementById('addBookBtn').onclick=()=>openBookModal();
-  document.getElementById('closeBookModal').onclick=closeBookModal;
-  document.getElementById('saveBookBtn').onclick=saveBook;
-  document.getElementById('bookModal').onclick=e=>{if(e.target.id==='bookModal')closeBookModal();};
-  document.getElementById('exportBtn').onclick=exportData;
-  document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
-  document.getElementById('importFile').onchange=e=>{if(e.target.files[0])importData(e.target.files[0]);};
-  document.getElementById('resetBtn').onclick=()=>{
-    if(confirm('すべての記録を初期状態に戻します。この操作は元に戻せません。')){
-      state=initialState();save();renderAll();
-    }
-  };
-
-  updateCarryover();
-  buildTodayPlan();
-  renderAll();
-
-  if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+carryover();plan();renderAll();
+if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 })();
 </script>
 </body>
