@@ -30,11 +30,15 @@ label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:11p
 </style>
 </head>
 <body>
-<header><div class="head"><h1>宅建 学習ナビ</h1><div class="version">ver. 0.2.1</div></div></header>
+<header><div class="head"><h1>宅建 学習ナビ</h1><div class="version">ver. 0.2.2</div></div></header>
 <main>
 <section id="home" class="section active">
  <div class="card hero"><div class="eyebrow" id="examLabel"></div><div class="countdown" id="countdown"></div><div class="sub" id="paceText"></div><div class="progress"><div id="overallProgress"></div></div><div class="tiny" id="overallText"></div></div>
- <div class="card"><h2>今日のメニュー</h2><div class="sub" id="todaySummary"></div><div class="today-list" id="todayList" style="margin:12px 0"></div><div class="buttonrow"><button id="startBtn">今日の問題を始める</button><button class="secondary" id="rebuildBtn">組み直す</button></div><div class="notice warn" id="carryNotice"></div></div>
+ <div class="card"><h2>今日持っている問題集</h2>
+<div class="sub">持っている問題集だけONにすると、その教材だけから新規・復習を出します。選択は今日だけ有効です。</div>
+<div id="carryBooks" style="display:grid;gap:8px;margin-top:12px"></div>
+<div class="notice" id="carryBookNotice"></div></div>
+<div class="card"><h2>今日のメニュー</h2><div class="sub" id="todaySummary"></div><div class="today-list" id="todayList" style="margin:12px 0"></div><div class="buttonrow"><button id="startBtn">今日の問題を始める</button><button class="secondary" id="rebuildBtn">組み直す</button></div><div class="notice warn" id="carryNotice"></div></div>
  <div class="card"><h2>現在の状況</h2><div class="grid"><div class="stat"><span class="tiny">○</span><strong class="ok" id="statO">0</strong></div><div class="stat"><span class="tiny">△</span><strong class="mid" id="statT">0</strong></div><div class="stat"><span class="tiny">×</span><strong class="bad" id="statX">0</strong></div><div class="stat"><span class="tiny">未回答</span><strong id="statU">0</strong></div></div></div>
  <div class="card"><h2>問題集別の進捗</h2><div id="bookProgress"></div></div>
 </section>
@@ -59,7 +63,7 @@ label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:11p
 
 <script>
 (()=>{
-const KEY='takkenStudyNav_v010',VERSION='0.2.1',DAY=86400000;
+const KEY='takkenStudyNav_v010',VERSION='0.2.2',DAY=86400000;
 let studyIndex=0;
 
 const BOOKS=[
@@ -89,14 +93,14 @@ function initial(){
  '1':{rating:'X',history:[{date:'2026-07-28',rating:'X'}],nextDue:'2026-07-29',streak:0},
  '2':{rating:'O',history:[{date:'2026-07-28',rating:'O'}],nextDue:'2026-08-04',streak:1},
  '3':{rating:'X',history:[{date:'2026-07-28',rating:'X'}],nextDue:'2026-07-29',streak:0},
- '4':{rating:'O',history:[{date:'2026-07-28',rating:'O'}],nextDue:'2026-08-04',streak:1}},book3:{}},dailyPlans:{},carryover:0};
+ '4':{rating:'O',history:[{date:'2026-07-28',rating:'O'}],nextDue:'2026-08-04',streak:1}},book3:{}},dailyPlans:{},todayBooks:{},carryover:0};
 }
 function load(){
  try{
   const old=JSON.parse(localStorage.getItem(KEY));
   if(!old)return initial();
   old.settings=old.settings||initial().settings;
-  old.results=old.results||{};
+  old.results=old.results||{};old.todayBooks=old.todayBooks||{};
   BOOKS.forEach(b=>{if(!old.results[b.id])old.results[b.id]={}});
   const changed=old.version!==VERSION||!old.books||old.books.length!==3;
   old.books=structuredClone(BOOKS);old.version=VERSION;
@@ -107,16 +111,35 @@ function load(){
 }
 let state=load();
 const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
+function ensureTodayBooks(){
+ state.todayBooks=state.todayBooks||{};
+ const d=today();
+ if(!Array.isArray(state.todayBooks[d])||!state.todayBooks[d].length){
+  state.todayBooks[d]=state.books.map(b=>b.id);save();
+ }
+ return state.todayBooks[d];
+}
+function selectedBookIds(){return ensureTodayBooks()}
+function isSelectedBook(id){return selectedBookIds().includes(id)}
+function setBookSelected(id,on){
+ let ids=selectedBookIds().slice();
+ if(on&&!ids.includes(id))ids.push(id);
+ if(!on)ids=ids.filter(x=>x!==id);
+ if(!ids.length){alert('最低1冊は選んでください');return}
+ state.todayBooks[today()]=state.books.filter(b=>ids.includes(b.id)).map(b=>b.id);
+ delete state.dailyPlans[today()];
+ save();plan(true);studyIndex=0;renderAll();
+}
 const book=id=>state.books.find(b=>b.id===id);
 const result=(id,n)=>state.results?.[id]?.[String(n)]||null;
 const rating=(id,n)=>result(id,n)?.rating||'U';
 function category(id,n){const arr=CATEGORIES[id]||[];let name='分類未登録';for(const [start,title] of arr){if(n>=start)name=title;else break}return name}
 function allQuestions(){const a=[];state.books.sort((x,y)=>x.order-y.order).forEach(b=>{for(let n=1;n<=b.count;n++)a.push({bookId:b.id,n})});return a}
 function statsFor(id=null){const s={O:0,T:0,X:0,U:0,total:0};allQuestions().filter(q=>!id||q.bookId===id).forEach(q=>{s[rating(q.bookId,q.n)]++;s.total++});return s}
-function dueQuestions(){return allQuestions().filter(q=>{const r=result(q.bookId,q.n);return r?.nextDue&&r.nextDue<=today()}).sort((a,b)=>{const p={X:0,T:1,O:2};const ra=result(a.bookId,a.n),rb=result(b.bookId,b.n);return p[ra.rating]-p[rb.rating]||ra.nextDue.localeCompare(rb.nextDue)})}
+function dueQuestions(){return allQuestions().filter(q=>isSelectedBook(q.bookId)).filter(q=>{const r=result(q.bookId,q.n);return r?.nextDue&&r.nextDue<=today()}).sort((a,b)=>{const p={X:0,T:1,O:2};const ra=result(a.bookId,a.n),rb=result(b.bookId,b.n);return p[ra.rating]-p[rb.rating]||ra.nextDue.localeCompare(rb.nextDue)})}
 function unansweredByBook(id){const b=book(id),a=[];for(let n=1;n<=b.count;n++)if(!result(id,n))a.push({bookId:id,n});return a}
 function groupedFresh(target){
- const books=state.books.slice().sort((a,b)=>a.order-b.order);
+ const books=state.books.slice().filter(b=>isSelectedBook(b.id)).sort((a,b)=>a.order-b.order);
  const pools=books.map(b=>({bookId:b.id,items:unansweredByBook(b.id)})).filter(p=>p.items.length);
  if(!pools.length)return [];
  const base=Math.floor(target/pools.length);
@@ -151,7 +174,7 @@ function plan(force=false){
  const reviewRaw=dueQuestions().slice(0,reviewCap).map(q=>({...q,type:'review'}));
  const fresh=groupedFresh(newTarget());
  const items=[];
- state.books.slice().sort((a,b)=>a.order-b.order).forEach(b=>{
+ state.books.slice().filter(b=>isSelectedBook(b.id)).sort((a,b)=>a.order-b.order).forEach(b=>{
    items.push(...fresh.filter(q=>q.bookId===b.id));
    items.push(...reviewRaw.filter(q=>q.bookId===b.id));
  });
@@ -168,7 +191,16 @@ function rateQuestion(q,r){
  carryover();save();studyIndex=0;renderAll()
 }
 function renderHome(){
- carryover();const s=statsFor(),days=Math.max(0,daysBetween(today(),state.settings.examDate)),answered=s.total-s.U,pct=s.total?Math.round(answered/s.total*100):0,need=days?Math.ceil(s.U/days):s.U;
+ carryover();
+ const selected=selectedBookIds();
+ document.getElementById('carryBooks').innerHTML=state.books.slice().sort((a,b)=>a.order-b.order).map(b=>{
+  const on=selected.includes(b.id);
+  return `<button data-carry="${b.id}" style="width:100%;background:${on?'#e8f3fb':'#fff'};color:var(--navy);border:1px solid ${on?'#8eb8d5':'var(--line)'};display:flex;justify-content:space-between;align-items:center"><span>${esc(b.title)}</span><span>${on?'✓ ON':'OFF'}</span></button>`;
+ }).join('');
+ document.querySelectorAll('[data-carry]').forEach(btn=>btn.onclick=()=>setBookSelected(btn.dataset.carry,!isSelectedBook(btn.dataset.carry)));
+ const omitted=state.books.filter(b=>!selected.includes(b.id));
+ document.getElementById('carryBookNotice').textContent=omitted.length?`今日は「${selected.map(id=>book(id).title).join('・')}」だけで進めます。外した教材の問題は消えず、次にONにした日に再び出題対象になります。`:'今日は3冊すべてを対象にします。';
+const s=statsFor(),days=Math.max(0,daysBetween(today(),state.settings.examDate)),answered=s.total-s.U,pct=s.total?Math.round(answered/s.total*100):0,need=days?Math.ceil(s.U/days):s.U;
  document.getElementById('examLabel').textContent=`${state.settings.examDate.replaceAll('-','/')}まで`;document.getElementById('countdown').textContent=`あと${days}日`;document.getElementById('paceText').textContent=s.U?`未回答${s.U}問。1周するには平均1日${need}問必要です。`:'全問題を1周済み。復習中心です。';document.getElementById('overallProgress').style.width=pct+'%';document.getElementById('overallText').textContent=`全${s.total}問中 ${answered}問回答（${pct}%）`;
  ['O','T','X','U'].forEach(k=>document.getElementById('stat'+k).textContent=s[k]);
  const items=planStatus(),done=items.filter(x=>x.done).length;document.getElementById('todaySummary').textContent=`新規${items.filter(x=>x.type==='new').length}問＋復習${items.filter(x=>x.type==='review').length}問（完了 ${done}/${items.length}）｜問題集ごとにまとめて出題`;
